@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+http://www.springframework.org/schema/beans 
+http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+http://www.springframework.org/schema/tx 
+http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+http://www.springframework.org/schema/aop 
+http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+">
+
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:props/db.properties</value>
+			</list>
+		</property>
+	</bean>
+	<!--阿里巴巴  druid 连接池 -->
+  <!-- 数据源配置 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+        init-method="init" destroy-method="close">
+        <!-- 驱动名称 -->
+        <property name="DriverClassName" value="${driverClassName}" />
+        <!-- JDBC连接串 -->
+        <property name="url" value="${url}" />
+        <!-- 数据库用户名称 -->
+        <property name="username" value="root" />
+        <!-- 数据库密码 -->
+        <property name="password" value="password" />
+        <!-- 连接池最大使用连接数量 -->
+        <property name="maxActive" value="${maxActive}" />
+        <!-- 初始化大小 -->
+        <property name="initialSize" value="${initialSize}" />
+        <!-- 获取连接最大等待时间 -->
+        <property name="maxWait" value="${maxWait}" />
+        <!-- 连接池最小空闲 -->
+        <property name="minIdle" value="${minIdle}" />
+        <!-- 逐出连接的检测时间间隔 -->
+        <property name="timeBetweenEvictionRunsMillis" value="${timeBetweenEvictionRunsMillis}" />
+        <!-- 最小逐出时间 -->
+        <property name="minEvictableIdleTimeMillis" value="${minEvictableIdleTimeMillis}" />
+        <!-- 测试有效用的SQL Query -->
+        <property name="validationQuery" value="${validationQuery}" />
+        <!-- 连接空闲时测试是否有效 -->
+        <property name="testWhileIdle" value="${testWhileIdle}" />
+        <!-- 获取连接时测试是否有效 -->
+        <property name="testOnBorrow" value="${testOnBorrow}" />
+        <!-- 归还连接时是否测试有效 -->
+        <property name="testOnReturn" value="${testOnReturn}" />
+    </bean>
+ 
+ 	<!-- dbcp 方式 -->
+	<!--  
+	<bean id="dataSourceDbcp" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+
+		<property name="driverClassName" value="${driverClassName}" />
+		<property name="url" value="${url}" />
+		<property name="username" value="root" />
+		<property name="password" value="password" />
+
+		<property name="maxActive" value="${maxActive}" />
+		<property name="minIdle" value="${minIdle}" />
+		<property name="maxWait" value="${maxWait}" />
+		<property name="defaultAutoCommit" value="true" />
+
+		<property name="timeBetweenEvictionRunsMillis" value="${timeBetweenEvictionRunsMillis}" />
+		<property name="minEvictableIdleTimeMillis" value="${minEvictableIdleTimeMillis}" />
+
+		<property name="validationQuery" value="${validationQuery}" />
+		<property name="testWhileIdle" value="${testWhileIdle}" />
+		<property name="testOnBorrow" value="${testOnBorrow}" />
+		<property name="testOnReturn" value="${testOnReturn}" />
+		<property name="maxOpenPreparedStatements" value="${maxOpenPreparedStatements}" />
+		<property name="removeAbandoned" value="${removeAbandoned}" />
+		<property name="removeAbandonedTimeout" value="${removeAbandonedTimeout}" />
+		<property name="logAbandoned" value="${logAbandoned}" />
+	</bean>
+	
+	--> 
+    <!-- JPA实体工厂配置 -->
+    <bean id="entityManagerFactory"
+        class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <!-- 扫描实体路径 -->
+        <property name="packagesToScan" value="com.ly.beans" />
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+                <property name="showSql" value="true" />
+            </bean>
+        </property>
+        <property name="jpaProperties">
+            <props>
+                <!--设置外连接抓取树的最大深度 -->
+                <prop key="hibernate.max_fetch_depth">3</prop>
+                <prop key="hibernate.jdbc.fetch_size">18</prop>
+                <prop key="hibernate.jdbc.batch_size">10</prop>
+                <!-- 自动建表类型 validate|create|create-drop|update -->
+                <prop key="hibernate.hbm2ddl.auto">validate</prop>
+                <!-- 是否显示SQL -->
+                <prop key="hibernate.show_sql">false</prop>
+                <!-- 显示SQL是否格式化 -->
+                <prop key="hibernate.format_sql">false</prop>
+                <!-- 关闭二级缓存 -->
+                <prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+                <!-- 关闭实体字段映射校验 -->
+                <prop key="javax.persistence.validation.mode">none</prop>
+            </props>
+        </property>
+    </bean>
+	
+
+
+
+	<!-- 配置hibernate session工厂 -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.hbm2ddl.auto">${hibernate.hbm2ddl.auto}</prop>
+				<prop key="hibernate.dialect">${hibernate.dialect}</prop>
+				<prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+				<prop key="hibernate.format_sql">${hibernate.format_sql}</prop>
+			</props>
+		</property>
+
+		<!-- 自动扫描注解方式配置的hibernate实体类文件 -->
+		<property name="packagesToScan">
+			<list>
+				<value>com.yx.sms.model</value>
+			</list>
+		</property>
+	</bean>
+	<!-- 配置事务管理器 -->
+	<bean name="transactionManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+
+	<!-- 注解方式配置事务 -->
+	<!-- <tx:annotation-driven transaction-manager="transactionManager" /> -->
+
+	<!-- 拦截器方式配置事务 -->
+	<tx:advice id="transactionAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<!--service层以这些name开头的方法都会被加入spring事务管理中,调用这些方法时会自动创建事务 -->
+			<tx:method name="add*" />
+			<tx:method name="save*" />
+			<tx:method name="update*" />
+			<tx:method name="modify*" />
+			<tx:method name="edit*" />
+			<tx:method name="delete*" />
+			<tx:method name="remove*" />
+			<tx:method name="repair" />
+			<tx:method name="deleteAndRepair" />
+
+			<tx:method name="get*" propagation="SUPPORTS" />
+			<tx:method name="find*" propagation="SUPPORTS" />
+			<tx:method name="load*" propagation="SUPPORTS" />
+			<tx:method name="search*" propagation="SUPPORTS" />
+			<tx:method name="datagrid*" propagation="SUPPORTS" />
+
+			<tx:method name="*" propagation="SUPPORTS" />
+		</tx:attributes>
+	</tx:advice>
+	<!-- spring的事务控制是放在service层的 -->
+	<aop:config>
+		<aop:pointcut id="transactionPointcut" expression="execution(* com.yx.sms..*Impl.*(..))" />
+		<aop:advisor pointcut-ref="transactionPointcut"
+			advice-ref="transactionAdvice" />
+	</aop:config>
+</beans>
