@@ -30,7 +30,7 @@ http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
         <!-- 数据库用户名称 -->
         <property name="username" value="root" />
         <!-- 数据库密码 -->
-        <property name="password" value="password" />
+        <property name="password" value="root" />
         <!-- 连接池最大使用连接数量 -->
         <property name="maxActive" value="${maxActive}" />
         <!-- 初始化大小 -->
